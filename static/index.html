@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local AI Automation Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Header -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <span class="title">Local AI Automator</span>
+          <span class="badge" id="ollama-status"><span class="dot"></span> Ollama Active</span>
+        </div>
+      </div>
+      
+      <div class="header-controls">
+        <div class="vitals-strip">
+          <div class="vital-item" title="CPU Usage">
+            <span class="vital-label">CPU</span>
+            <span class="vital-value" id="cpu-stat">--%</span>
+          </div>
+          <div class="vital-item" title="RAM Usage">
+            <span class="vital-label">RAM</span>
+            <span class="vital-value" id="ram-stat">-- GB</span>
+          </div>
+          <div class="vital-item" title="Disk Free">
+            <span class="vital-label">DISK FREE</span>
+            <span class="vital-value" id="disk-stat">-- GB</span>
+          </div>
+        </div>
+
+        <div class="model-select-wrapper">
+          <label for="model-selector">Model:</label>
+          <select id="model-selector" class="select-input">
+            <option value="llama3.2:1b">llama3.2:1b</option>
+            <option value="qwen2.5-coder:1.5b">qwen2.5-coder:1.5b</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="main-content">
+      <!-- Left Sidebar: Quick Workflows -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h3>⚡ Quick Automations</h3>
+          <span class="subtext">1-Click Local Workflows</span>
+        </div>
+
+        <div class="quick-cards">
+          <button class="quick-card" onclick="runQuickAction('system_health')">
+            <div class="card-icon">📊</div>
+            <div class="card-info">
+              <div class="card-title">System Health Check</div>
+              <div class="card-desc">CPU, RAM, Disk & OS analysis</div>
+            </div>
+          </button>
+
+          <button class="quick-card" onclick="runQuickAction('organize_downloads')">
+            <div class="card-icon">📂</div>
+            <div class="card-info">
+              <div class="card-title">Organize Downloads</div>
+              <div class="card-desc">Dry-run sort into categories</div>
+            </div>
+          </button>
+
+          <button class="quick-card" onclick="promptScrapeUrl()">
+            <div class="card-icon">🌐</div>
+            <div class="card-info">
+              <div class="card-title">Scrape & Summarize URL</div>
+              <div class="card-desc">Extract text & key insights</div>
+            </div>
+          </button>
+
+          <button class="quick-card" onclick="runQuickAction('list_workspace')">
+            <div class="card-icon">📁</div>
+            <div class="card-info">
+              <div class="card-title">Inspect Workspace</div>
+              <div class="card-desc">List files & project structure</div>
+            </div>
+          </button>
+
+          <button class="quick-card" onclick="runQuickAction('clean_temp_preview')">
+            <div class="card-icon">🧹</div>
+            <div class="card-info">
+              <div class="card-title">Preview Temp Cleanup</div>
+              <div class="card-desc">Audit reclaimable temp files</div>
+            </div>
+          </button>
+        </div>
+
+        <div class="tools-info">
+          <h4>Active Local Tools</h4>
+          <ul class="tool-list">
+            <li>📁 File Organizer & Bulk Renamer</li>
+            <li>🌐 Web Scraper & Research</li>
+            <li>📄 PDF & CSV Tabular Analyzer</li>
+            <li>💻 Safe PowerShell Runner</li>
+          </ul>
+        </div>
+      </aside>
+
+      <!-- Center: Chat & Execution Stream -->
+      <section class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+          <div class="message system-welcome">
+            <div class="msg-avatar">⚡</div>
+            <div class="msg-body">
+              <h3>Local AI Automation Agent Ready</h3>
+              <p>Everything runs 100% locally on your machine with Ollama. Ask anything or click a quick automation card on the left to get started.</p>
+              <div class="starter-chips">
+                <button class="chip" onclick="setInputAndSend('Show my top running system processes and RAM usage')">🖥️ Show RAM & Processes</button>
+                <button class="chip" onclick="setInputAndSend('List all files in the current folder with their sizes')">📂 List Current Files</button>
+                <button class="chip" onclick="setInputAndSend('How can I automate my daily file backups with PowerShell?')">💡 PowerShell Automation Advice</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Box -->
+        <div class="input-container">
+          <form id="chat-form" onsubmit="handleSend(event)">
+            <div class="input-wrapper">
+              <textarea 
+                id="prompt-input" 
+                placeholder="Give your agent a task (e.g., 'Organize my Downloads folder', 'Summarize this website', 'Check disk space')..." 
+                rows="1" 
+                onkeydown="handleKeyDown(event)"
+              ></textarea>
+              <button type="submit" id="send-btn" class="send-button">
+                <span>Run</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirm-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-badge">⚠️ Safety Confirmation</span>
+        <h3 id="modal-title">Confirm Action</h3>
+      </div>
+      <div class="modal-body">
+        <p id="modal-desc">This action involves modifying files or running a system command.</p>
+        <pre id="modal-code" class="modal-code-preview"></pre>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+        <button class="btn btn-primary" id="modal-confirm-btn" onclick="executeConfirmedAction()">Proceed & Execute</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
